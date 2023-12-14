@@ -3,22 +3,20 @@ from math import sqrt
 from random import randint
 
 class Asteroid:
-    def __init__(self, screen_width, screen_height):
+    def __init__(self, screen_width, screen_height, speed, health, damage, size_multiplier, sound_volume):
         # Load enemy image
         assets_dir = "assets"
         image_path = os.path.join(assets_dir, "asteroid.png")
         self.image = pygame.image.load(image_path)
-
-        self.width, self.height = self.image.get_size()
-        self.radius = 25
-        self.speed = randint(10,15) / 10
-        print(self.speed)
-        self.max_health = 50
+        self.scale = screen_width / 800
+        self.width, self.height = (self.image.get_width() * self.scale, self.image.get_height() * self.scale)
+        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+        self.radius = self.image.get_width() / 2
+        self.speed = speed
+        self.max_health = health
         self.health = self.max_health
-
-        
-
-        self.damage = 5
+        self.damage = damage
+        self.sound_volume = sound_volume
 
         # Calculate the starting position
         if randint(0,1):
@@ -62,8 +60,8 @@ class Asteroid:
         surface.blit(self.image, (self.x - self.radius, self.y - self.radius))
 
         # Draw health bar
-        health_bar_width = 50
-        health_bar_height = 5
+        health_bar_width = 50 * self.scale
+        health_bar_height = 5 * self.scale
         health_bar_rect = pygame.Rect(self.x - health_bar_width // 2, self.y + self.radius + 10, health_bar_width, health_bar_height)
         pygame.draw.rect(surface, (255, 0, 0), health_bar_rect)
         
@@ -74,9 +72,15 @@ class Asteroid:
     def delete(self, asteroids):
         asteroids.remove(self)
 
+    # Returns True if asteroid died
     def take_damage(self, asteroids, damage):
         sound = pygame.mixer.Sound("assets/destroy.wav")
+        sound.set_volume(self.sound_volume)
         self.health = max(0, self.health - damage)
+        died = False
         if self.health == 0:
             self.delete(asteroids)
             sound.play()
+            died = True
+            return died
+        return died
