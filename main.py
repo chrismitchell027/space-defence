@@ -95,6 +95,7 @@ def upgrade_menu(screen, player):
             for button in buttons:
                 if button.check_hit(event):
                     button.function()
+                    sounds["powerup"].play()
                     return
 
         #screen.fill((0, 0, 0))  # Clear the screen
